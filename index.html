@@ -6,55 +6,161 @@
 <title>阿里系技术类职位汇总（2026年5月更新）</title>
 <style>
 * { box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; color: #333; }
-.container { max-width: 1360px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 24px; }
-h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px 0; }
-.subtitle { font-size: 13px; color: #888; margin-bottom: 16px; }
-.section-label { font-size: 12px; color: #aaa; margin: 12px 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; }
-.tabs { display: flex; gap: 0; margin-bottom: 4px; border-bottom: 2px solid #eee; flex-wrap: wrap; }
-.tab { padding: 10px 20px; cursor: pointer; font-size: 14px; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; user-select: none; }
-.tab:hover { color: #333; }
-.tab.active { color: #1677ff; border-bottom-color: #1677ff; font-weight: 500; }
-.tab .cnt { font-size: 11px; color: #aaa; margin-left: 4px; }
-.tab.active .cnt { color: #1677ff; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pulseGlow { 0%,100% { box-shadow: 0 0 8px rgba(0,212,255,0.08); } 50% { box-shadow: 0 0 16px rgba(0,212,255,0.18); } }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  margin: 0; padding: 20px;
+  background: linear-gradient(145deg, #0a0e27 0%, #121837 50%, #1a1e3e 100%);
+  color: #e0e6ed;
+  min-height: 100vh;
+  position: relative;
+}
+body::before {
+  content: '';
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background-image: radial-gradient(rgba(0,212,255,0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  max-width: 1360px; margin: 0 auto;
+  background: rgba(12,18,45,0.88);
+  border-radius: 16px; padding: 28px;
+  border: 1px solid rgba(0,212,255,0.12);
+  box-shadow: 0 4px 40px rgba(0,0,0,0.5), 0 0 60px rgba(0,212,255,0.04);
+  position: relative; z-index: 1;
+  animation: fadeInUp 0.7s ease-out;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+h2 {
+  font-size: 24px; font-weight: 700; margin: 0 0 4px 0;
+  background: linear-gradient(135deg, #00d4ff 0%, #a855f7 50%, #00d4ff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: fadeIn 1s ease-out;
+}
+.subtitle { font-size: 13px; color: #6b7a8d; margin-bottom: 18px; }
+
+.section-label {
+  font-size: 11px; color: #4a5a6d; margin: 14px 0 8px 0;
+  text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;
+}
+
+.tabs { display: flex; gap: 0; margin-bottom: 6px; border-bottom: 1px solid rgba(0,212,255,0.1); flex-wrap: wrap; }
+.tab {
+  padding: 10px 20px; cursor: pointer; font-size: 14px; color: #6b7a8d;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: all 0.3s ease; user-select: none;
+}
+.tab:hover { color: #c0d0e0; }
+.tab.active { color: #00d4ff; border-bottom-color: #00d4ff; font-weight: 500; text-shadow: 0 0 12px rgba(0,212,255,0.3); }
+.tab .cnt { font-size: 11px; color: #4a5a6d; margin-left: 4px; }
+.tab.active .cnt { color: #00d4ff; }
+
 .search-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-.search-row input, .search-row select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; outline: none; }
+.search-row input, .search-row select {
+  padding: 9px 14px; border: 1px solid rgba(0,212,255,0.15); border-radius: 8px;
+  font-size: 13px; outline: none;
+  background: rgba(10,14,39,0.7); color: #c8d6e5;
+  transition: all 0.25s ease;
+}
+.search-row input:focus, .search-row select:focus {
+  border-color: rgba(0,212,255,0.4);
+  box-shadow: 0 0 12px rgba(0,212,255,0.1);
+}
+.search-row input::placeholder { color: #4a5a6d; }
 .search-row input { flex: 1; min-width: 180px; }
-.search-row select { min-width: 90px; }
+.search-row select { min-width: 90px; cursor: pointer; }
+.search-row select option { background: #0f1535; color: #c8d6e5; }
+
 table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
-th { text-align: left; padding: 10px; background: #f9f9f9; color: #666; font-weight: 500; border-bottom: 2px solid #eee; position: sticky; top: 0; font-size: 12px; z-index: 1; }
-td { padding: 9px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; word-break: break-word; overflow-wrap: break-word; }
-tr:hover td { background: #f8f8ff; }
-a { color: #1677ff; text-decoration: none; }
-a:hover { text-decoration: underline; }
-.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; white-space: nowrap; }
-.badge-co { background: #fff7e6; color: #d48806; }
-.badge-biz { background: #e8f4ff; color: #1677ff; }
-.table-wrap { max-height: 660px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; }
-.count { font-size: 13px; color: #888; margin-bottom: 10px; }
-.idx { color: #bbb; font-size: 12px; }
-.stats { display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
-.stat-card { padding: 10px 16px; border-radius: 8px; background: #fafafa; border: 1px solid #eee; min-width: 90px; cursor: pointer; transition: all 0.15s; }
-.stat-card:hover { border-color: #1677ff; background: #f0f5ff; }
-.stat-card.active { border-color: #1677ff; background: #e6f0ff; }
-.stat-card .num { font-size: 22px; font-weight: 600; color: #1677ff; }
-.stat-card .label { font-size: 11px; color: #888; margin-top: 2px; white-space: nowrap; }
-/* Tech direction badge colors */
-.bt-ai-agent { background: #f0e6ff; color: #722ed1; }
-.bt-vision { background: #fff0f6; color: #c41d7f; }
-.bt-speech { background: #fcffe6; color: #7cb305; }
-.bt-embodied { background: #e6fffb; color: #08979c; }
-.bt-nlp { background: #fff2e8; color: #d4380d; }
-.bt-backend { background: #f6ffed; color: #389e0d; }
-.bt-frontend { background: #fff7e6; color: #d48806; }
-.bt-data { background: #e6f7ff; color: #0958d9; }
-.bt-test { background: #fff1f0; color: #cf1322; }
-.bt-devops { background: #f9f0ff; color: #531dab; }
-.bt-security { background: #fff0f0; color: #f5222d; }
-.bt-cloud { background: #e6fffb; color: #006d75; }
-.bt-hardware { background: #fffbe6; color: #ad8b00; }
-.bt-algorithm { background: #e8f4ff; color: #1677ff; }
-.bt-other { background: #f5f5f5; color: #8c8c8c; }
+th {
+  text-align: left; padding: 11px 10px;
+  background: rgba(8,12,35,0.9); color: #5a7a9a; font-weight: 600;
+  border-bottom: 1px solid rgba(0,212,255,0.12);
+  position: sticky; top: 0; font-size: 12px; z-index: 1;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+td {
+  padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: top; word-break: break-word; overflow-wrap: break-word;
+  transition: all 0.2s ease;
+}
+tr { transition: all 0.2s ease; }
+tr:hover td { background: rgba(0,212,255,0.05); }
+tr:hover { box-shadow: inset 3px 0 0 #00d4ff; }
+
+a { color: #00d4ff; text-decoration: none; transition: all 0.2s ease; }
+a:hover { text-decoration: underline; text-shadow: 0 0 8px rgba(0,212,255,0.3); }
+
+.badge {
+  display: inline-block; padding: 3px 9px; border-radius: 5px;
+  font-size: 11px; white-space: nowrap; font-weight: 500;
+  border: 1px solid transparent;
+}
+.badge-co { background: rgba(214,136,6,0.15); color: #f0b429; border-color: rgba(214,136,6,0.2); }
+.badge-biz { background: rgba(0,180,255,0.1); color: #5bc0eb; border-color: rgba(0,180,255,0.15); }
+
+.table-wrap {
+  max-height: 660px; overflow-y: auto;
+  border: 1px solid rgba(0,212,255,0.1); border-radius: 10px;
+  background: rgba(8,12,30,0.4);
+}
+.table-wrap::-webkit-scrollbar { width: 6px; }
+.table-wrap::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px; }
+.table-wrap::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.25); border-radius: 3px; }
+.table-wrap::-webkit-scrollbar-thumb:hover { background: rgba(0,212,255,0.4); }
+
+.count { font-size: 13px; color: #5a7a9a; margin-bottom: 10px; }
+.idx { color: #3a4a5d; font-size: 12px; }
+
+.stats { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.stat-card {
+  padding: 12px 16px; border-radius: 10px;
+  background: rgba(15,22,55,0.7); border: 1px solid rgba(0,212,255,0.1);
+  min-width: 90px; cursor: pointer;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.5s ease-out both;
+}
+.stat-card:hover {
+  border-color: rgba(0,212,255,0.35);
+  background: rgba(0,212,255,0.08);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 4px 20px rgba(0,212,255,0.12);
+}
+.stat-card.active {
+  border-color: rgba(0,212,255,0.5);
+  background: rgba(0,212,255,0.1);
+  box-shadow: 0 0 20px rgba(0,212,255,0.15);
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+.stat-card .num { font-size: 22px; font-weight: 700; color: #00d4ff; text-shadow: 0 0 12px rgba(0,212,255,0.2); }
+.stat-card .label { font-size: 11px; color: #5a7a9a; margin-top: 3px; white-space: nowrap; }
+
+/* Tech direction badge colors - dark theme */
+.bt-ai-agent { background: rgba(114,46,209,0.18); color: #b794f6; border-color: rgba(114,46,209,0.25); }
+.bt-vision { background: rgba(196,29,127,0.15); color: #f472b6; border-color: rgba(196,29,127,0.22); }
+.bt-speech { background: rgba(124,179,5,0.15); color: #a3e635; border-color: rgba(124,179,5,0.22); }
+.bt-embodied { background: rgba(8,151,156,0.15); color: #5eead4; border-color: rgba(8,151,156,0.22); }
+.bt-nlp { background: rgba(212,56,13,0.15); color: #fb923c; border-color: rgba(212,56,13,0.22); }
+.bt-backend { background: rgba(56,158,13,0.15); color: #73d13d; border-color: rgba(56,158,13,0.22); }
+.bt-frontend { background: rgba(214,136,6,0.15); color: #fbbf24; border-color: rgba(214,136,6,0.22); }
+.bt-data { background: rgba(9,88,217,0.18); color: #60a5fa; border-color: rgba(9,88,217,0.25); }
+.bt-test { background: rgba(207,19,34,0.15); color: #f87171; border-color: rgba(207,19,34,0.22); }
+.bt-devops { background: rgba(83,29,171,0.18); color: #a78bfa; border-color: rgba(83,29,171,0.25); }
+.bt-security { background: rgba(245,34,45,0.15); color: #ff7875; border-color: rgba(245,34,45,0.22); }
+.bt-cloud { background: rgba(0,109,117,0.18); color: #2dd4bf; border-color: rgba(0,109,117,0.25); }
+.bt-hardware { background: rgba(173,139,0,0.15); color: #facc15; border-color: rgba(173,139,0,0.22); }
+.bt-algorithm { background: rgba(0,160,255,0.15); color: #38bdf8; border-color: rgba(0,160,255,0.22); }
+.bt-other { background: rgba(100,116,139,0.15); color: #94a3b8; border-color: rgba(100,116,139,0.22); }
 </style>
 </head>
 <body>
@@ -580,10 +686,11 @@ companies.forEach(c => {
 
 // Company stats
 const csEl = document.getElementById('companyStats');
-companies.forEach(c => {
+companies.forEach((c, ci) => {
   const cnt = c === '全部' ? DATA.length : DATA.filter(d => d.c === c).length;
   const card = document.createElement('div');
   card.className = 'stat-card';
+  card.style.animationDelay = (ci * 0.06) + 's';
   card.innerHTML = '<div class="num">' + cnt + '</div><div class="label">' + (c === '全部' ? '总计' : c) + '</div>';
   card.addEventListener('click', () => {
     activeCompany = c;
@@ -597,12 +704,13 @@ companies.forEach(c => {
 // Tech direction stats
 const techOrder = ['AI Agent','视觉/多模态','语音/音频','具身智能','NLP/大模型','算法','后端开发','前端/客户端','数据','测试/质量','运维/SRE','安全','云平台/基础设施','硬件/嵌入式','其他'];
 const tsEl = document.getElementById('techStats');
-techOrder.forEach(t => {
+techOrder.forEach((t, ti) => {
   const cnt = DATA.filter(d => d.t === t).length;
   if (cnt === 0) return;
   const card = document.createElement('div');
   card.className = 'stat-card';
   card.dataset.tech = t;
+  card.style.animationDelay = (ti * 0.04) + 's';
   card.innerHTML = '<div class="num">' + cnt + '</div><div class="label">' + t + '</div>';
   card.addEventListener('click', () => {
     if (activeTech === t) { activeTech = ''; card.classList.remove('active'); }
