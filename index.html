@@ -21,9 +21,9 @@ h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px 0; }
 .search-row input, .search-row select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; outline: none; }
 .search-row input { flex: 1; min-width: 180px; }
 .search-row select { min-width: 90px; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
 th { text-align: left; padding: 10px; background: #f9f9f9; color: #666; font-weight: 500; border-bottom: 2px solid #eee; position: sticky; top: 0; font-size: 12px; z-index: 1; }
-td { padding: 9px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+td { padding: 9px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; word-break: break-word; overflow-wrap: break-word; }
 tr:hover td { background: #f8f8ff; }
 a { color: #1677ff; text-decoration: none; }
 a:hover { text-decoration: underline; }
@@ -76,7 +76,7 @@ a:hover { text-decoration: underline; }
 <div class="count" id="countLabel"></div>
 <div class="table-wrap">
 <table>
-<thead><tr><th style="width:28px">#</th><th style="width:62px">公司</th><th style="width:85px">技术方向</th><th style="width:85px">业务</th><th>职位名称</th><th style="width:120px">工作地址</th><th style="width:45px">投递</th></tr></thead>
+<thead><tr><th style="width:3%">#</th><th style="width:8%">公司</th><th style="width:10%">技术方向</th><th style="width:10%">业务</th><th style="width:40%">职位名称</th><th style="width:14%">工作地址</th><th style="width:15%">投递</th></tr></thead>
 <tbody id="tbody"></tbody>
 </table>
 </div>
