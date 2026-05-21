@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>阿里系技术类职位汇总（2026年5月更新）</title>
+<style>
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; color: #333; }
+.container { max-width: 1280px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 24px; }
+h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px 0; }
+.subtitle { font-size: 13px; color: #888; margin-bottom: 16px; }
+.tabs { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 2px solid #eee; flex-wrap: wrap; }
+.tab { padding: 10px 20px; cursor: pointer; font-size: 14px; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; user-select: none; }
+.tab:hover { color: #333; }
+.tab.active { color: #1677ff; border-bottom-color: #1677ff; font-weight: 500; }
+.tab .cnt { font-size: 11px; color: #aaa; margin-left: 4px; }
+.tab.active .cnt { color: #1677ff; }
+.search-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.search-row input, .search-row select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; outline: none; }
+.search-row input { flex: 1; min-width: 200px; }
+.search-row select { min-width: 100px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; padding: 10px; background: #f9f9f9; color: #666; font-weight: 500; border-bottom: 2px solid #eee; position: sticky; top: 0; font-size: 12px; z-index: 1; }
+td { padding: 9px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+tr:hover td { background: #f8f8ff; }
+a { color: #1677ff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; white-space: nowrap; }
+.badge-co { background: #fff7e6; color: #d48806; }
+.badge-biz { background: #e8f4ff; color: #1677ff; }
+.table-wrap { max-height: 680px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; }
+.count { font-size: 13px; color: #888; margin-bottom: 10px; }
+.idx { color: #bbb; font-size: 12px; }
+.stats { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.stat-card { padding: 12px 18px; border-radius: 8px; background: #fafafa; border: 1px solid #eee; min-width: 100px; }
+.stat-card .num { font-size: 24px; font-weight: 600; color: #1677ff; }
+.stat-card .label { font-size: 12px; color: #888; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="container">
+<h2>阿里系技术类职位汇总（2026年5月更新）</h2>
+<p class="subtitle">数据来源：淘天集团、高德地图、阿里云、夸克、钉钉官方招聘网站 | 筛选条件：职位类别=技术类，更新于2026年5月</p>
+<div class="stats" id="stats"></div>
+<div class="tabs" id="tabs"></div>
+<div class="search-row">
+<input type="text" id="searchInput" placeholder="搜索职位名称、业务或公司...">
+<select id="companyFilter"><option value="">全部公司</option></select>
+<select id="bizFilter"><option value="">全部业务</option></select>
+<select id="locFilter"><option value="">全部地点</option></select>
+</div>
+<div class="count" id="countLabel"></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th style="width:30px">#</th><th style="width:70px">公司</th><th style="width:90px">业务</th><th>职位名称</th><th style="width:130px">工作地址</th><th style="width:50px">投递</th></tr></thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+</div>
+<script>
+const DATA = [
+{"b": "淘天算法技术", "n": "淘天算法技术-推荐召回排序算法-杭州/北京", "l": "北京 / 杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011720010", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI Agent 开发工程师-营销前台", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011600035", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI 应用研发工程师-供应链库存方向", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100006280003", "c": "淘天集团"},
+{"b": "阿里妈妈", "n": "阿里妈妈-JAVA工程师-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100016440002", "c": "淘天集团"},
+{"b": "淘天算法技术", "n": "淘天算法技术-营销权益算法-杭州/北京", "l": "北京 / 杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100003080008", "c": "淘天集团"},
+{"b": "天猫校园", "n": "天猫校园-Android开发工程师-创新技术", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100010180021", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI前端开发工程师-营销方向", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100000960024", "c": "淘天集团"},
+{"b": "智能算法产品事业部", "n": "智能算法产品事业部-广告算法工程师-展示召回", "l": "北京", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011300026", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-Agent Infra平台研发工程师-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100016200001", "c": "淘天集团"},
+{"b": "淘天算法技术", "n": "淘天算法技术-用增权益算法-杭州/北京", "l": "北京 / 杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100001160022", "c": "淘天集团"},
+{"b": "淘天算法技术", "n": "淘天算法技术-搜推大模型应用算法-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100015940003", "c": "淘天集团"},
+{"b": "淘宝算法技术", "n": "淘宝算法技术-搜推算法工程师（LLM）-杭州/北京", "l": "北京 / 杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100005680008", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-数据科学家-交易业务技术", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100015940001", "c": "淘天集团"},
+{"b": "淘天算法技术", "n": "淘天算法技术-大模型应用算法专家-杭州/北京", "l": "北京 / 杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100013280013", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI Agent 开发工程师-用户场景营销", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100012440013", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI Agent开发工程师（急招）-AI研发", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100009260005", "c": "淘天集团"},
+{"b": "淘天技术", "n": "淘天技术-客户端开发工程师-搜索技术-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100015820001", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-Agent应用算法工程师-供给智能", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100001220015", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI Agent 评测专家（急招）-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100002680002", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-高级Android/iOS开发工程师-用户&内容技术", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100001800019", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-高级测试开发工程师-用户&内容技术", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011200019", "c": "淘天集团"},
+{"b": "淘天算法技术", "n": "淘天算法技术-语音算法（AI助手）-北京/杭州*", "l": "北京", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100004640008", "c": "淘天集团"},
+{"b": "淘天算法技术", "n": "淘天算法技术-高级推荐算法专家-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100005480007", "c": "淘天集团"},
+{"b": "淘宝平台事业部", "n": "淘宝平台事业部-AI应用研发工程师-店小蜜开发", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011560043", "c": "淘天集团"},
+{"b": "智能算法产品事业部", "n": "智能算法产品事业部-用增外投广告出价算法-杭州/北京", "l": "北京 / 杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014140006", "c": "淘天集团"},
+{"b": "阿里妈妈", "n": "阿里妈妈-引擎开发工程师-联盟技术", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100015380004", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI Agent 开发工程师-物流执行", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011300007", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-大模型算法工程师-物流技术", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100006300004", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-质量AI工程师-营销方向", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011600024", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI Agent 开发工程师-营销方向", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100007440004", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI应用研发工程师-交易平台", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100003480003", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-Java开发工程师-行业运营方向", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100012140015", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI Agent 开发工程师-淘特", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100001220005", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI前端开发工程师-商品&库存", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011720004", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-质量Agent应用工程师-供给方向", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011400048", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI Agent 后训练专家（急招）-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100002760001", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI前端开发工程师-架构＆体验方向", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011440020", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-高级JAVA开发工程师-商家数据", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011240007", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-后训练算法工程师-用户场景营销", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100012640001", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-测试开发工程师-网站技术", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011200018", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-高级客户端开发工程师-淘宝原生研发技术", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100009440005", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI Agent 开发工程师-交易业务", "l": "北京", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011720021", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-客户端开发工程师-平台与系统技术", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100008860002", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI高级前端开发工程师-Weex引擎", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100008840001", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI Agent应用开发工程师-coding方向", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100007800019", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI前端开发工程师-商家&开放平台", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100007440002", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI Agent 开发工程师-商家&开放平台", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100007500006", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-JAVA开发工程师-商品方向", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100002040010", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-数据科学家-供给数据", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100001680027", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-高级java研发工程师-导购营销", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100000900004", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-Agent数据算法工程师-供给智能", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100001160021", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-Agent算法工程师-记忆召回", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014140001", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI Agent 优化工程师-电商交易方向", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011720022", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI Agent 开发工程师-营销工具", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011400046", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI前端开发工程师-用户场景营销", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011460005", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI Agent 开发/优化工程师-交易方向", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011300009", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI Agent 开发工程师-淘宝秒杀", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011240008", "c": "淘天集团"},
+{"b": "1688", "n": "1688-AI工程技术-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100008420002", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI数据湖与Agent开发工程师-用户场景＆营销方向", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100001280002", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-高级Java开发工程师-交易支付", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100000880014", "c": "淘天集团"},
+{"b": "闲鱼", "n": "闲鱼-AI Agent开发专家-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014260002", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI agent 开发工程师-金融业务", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100012020013", "c": "淘天集团"},
+{"b": "淘宝平台事业部", "n": "淘宝平台事业部-AI 数据科学家（经营方向）-物流部", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100015220001", "c": "淘天集团"},
+{"b": "天猫校园", "n": "天猫校园-前端开发工程师-电商业务", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100008380008", "c": "淘天集团"},
+{"b": "智能算法产品事业部", "n": "智能算法产品事业部-权益算法专家-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100008900004", "c": "淘天集团"},
+{"b": "淘天算法技术", "n": "淘天算法技术-广告算法工程师（M&T）-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100005120008", "c": "淘天集团"},
+{"b": "淘天算法技术", "n": "淘天算法技术-自营搜推算法工程师-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100008260003", "c": "淘天集团"},
+{"b": "淘天算法技术", "n": "淘天算法技术-算法专家（直播）-杭州/北京", "l": "北京 / 杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100001800027", "c": "淘天集团"},
+{"b": "淘天算法技术", "n": "淘天算法技术-生成式推荐/大模型应用算法-杭州*", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011420002", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-高级Java研发-推荐工程&Agent研发", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100015160004", "c": "淘天集团"},
+{"b": "淘天算法技术", "n": "淘天算法技术-多模态内容理解算法专家-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100015160003", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI Agent基建开发工程师（急招）-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014580010", "c": "淘天集团"},
+{"b": "阿里妈妈", "n": "阿里妈妈-高级算法工程师（NLP和相关性方向）-北京*", "l": "北京", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100005180002", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI应用研发工程师-用户消息与社交", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100006720008", "c": "淘天集团"},
+{"b": "阿里妈妈", "n": "阿里妈妈-广告大模型算法工程师(预估方向)-北京*", "l": "北京", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100001500008", "c": "淘天集团"},
+{"b": "智能算法产品事业部", "n": "智能算法产品事业部-广告大模型算法工程师（搜索召回&粗排）-北京", "l": "北京", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011640020", "c": "淘天集团"},
+{"b": "阿里妈妈", "n": "阿里妈妈-广告大模型算法工程师（搜索召回）-北京*", "l": "北京", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100006060010", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-3D应用开发工程师-3D云渲染", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014880003", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI Agent 开发工程师-商品&库存", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011720005", "c": "淘天集团"},
+{"b": "淘天算法技术", "n": "淘天算法技术-大模型应用算法工程师 (淘工厂)-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011640004", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI Agent 开发工程师-平台工程方向", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011300023", "c": "淘天集团"},
+{"b": "淘天算法技术", "n": "淘天算法技术-营销权益算法工程师-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100005220001", "c": "淘天集团"},
+{"b": "淘天技术", "n": "淘天技术-高级前端开发工程师-搜索技术", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014700006", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-（急招）高级Java研发工程师-淘宝百亿补贴 & 聚划算", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100006760007", "c": "淘天集团"},
+{"b": "淘宝平台事业部", "n": "淘宝平台事业部-高级算法工程师-智能服务", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100004060001", "c": "淘天集团"},
+{"b": "智能算法产品事业部", "n": "智能算法产品事业部-算法工程师-AIGC多模态方向-AI原生-视觉智能", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100012040004", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI研发工程师-数据智能", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100001680004", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-（急招）高级Java研发工程师-淘宝搜索", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014680002", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-数据科学家-用户理解与增长&决策智能", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014580005", "c": "淘天集团"},
+{"b": "【急招】业务技术", "n": "【急招】业务技术-大模型算法专家/高级工程师-杭州", "l": "北京 / 杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014640002", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-Java研发工程师-用户互动", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014580004", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-大模型算法工程师-直播AI", "l": "北京 / 杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014580003", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-高级Agent开发工程师-直播跨端研发", "l": "北京 / 杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014720001", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-高级数字人形象算法专家-直播技术", "l": "北京 / 杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014600006", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-Java高级研发工程师-88VIP&天猫积分核心电商方向", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=7000018803", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-高级数据研发工程师-数据平台", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014600005", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-Java高级研发工程师-省钱卡及会员核心链路方向", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100001400004", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI前端开发工程师-用户&内容", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014700001", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-【急聘】大语言模型（LLM）算法工程师-AI软件研发方向", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=7000043123", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-高级测试开发工程师-AI方向-会员技术", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100010200019", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-高级JAVA开发工程师-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014680001", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-大模型算法专家-急招", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014480006", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-测试开发工程师-直播技术", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011200022", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-高级AI Agent研发技术专家-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014600003", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-三维重建与生成算法工程师-3D生成", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014460007", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-大模型算法工程师-生成式AI", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014620001", "c": "淘天集团"},
+{"b": "淘天算法技术", "n": "淘天算法技术-推荐算法专家-北京", "l": "北京", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100009920009", "c": "淘天集团"},
+{"b": "AI原生应用", "n": "AI原生应用-（急招）视频图像生成算法-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100001820027", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-语音算法专家-直播", "l": "北京 / 杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014480010", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-（急招）高级Java开发工程师-天猫国际", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100010000009", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-高级Java开发工程师-用户增长", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014440007", "c": "淘天集团"},
+{"b": "淘天算法技术", "n": "淘天算法技术-搜索流量机制算法-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014480004", "c": "淘天集团"},
+{"b": "淘天算法技术", "n": "淘天算法技术-搜索供给机制算法工程师-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100012140003", "c": "淘天集团"},
+{"b": "阿里妈妈", "n": "阿里妈妈-展示广告机制策略算法-北京", "l": "北京", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100003760004", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-测试开发工程师-营销质量", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100006700009", "c": "淘天集团"},
+{"b": "阿里妈妈", "n": "阿里妈妈-AI广告数据研发-北京/杭州", "l": "北京", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100010920008", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-数据科学家-AI智能决策", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100013300002", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI算法工程师-供应链方向", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100010080055", "c": "淘天集团"},
+{"b": "淘天算法技术", "n": "淘天算法技术-大模型&Agent算法工程师-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011600006", "c": "淘天集团"},
+{"b": "淘天算法技术", "n": "淘天算法技术-算法专家（商品基础数据）-杭州*", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100004400007", "c": "淘天集团"},
+{"b": "业务技术", "n": "业务技术-AI应用开发-天猫新品营销技术", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011260008", "c": "淘天集团"},
+{"b": "阿里妈妈", "n": "阿里妈妈-AI广告引擎数据开发工程师(Java)-北京", "l": "北京", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100013780010", "c": "淘天集团"},
+{"b": "高级Agent开发工程师", "n": "高级Agent开发工程师-直播前端研发-北京/杭州", "l": "北京 / 杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=7000039116", "c": "淘天集团"},
+{"b": "阿里妈妈", "n": "阿里妈妈-广告应用系统研发工程师（JAVA）-北京", "l": "北京", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014100001", "c": "淘天集团"},
+{"b": "阿里妈妈", "n": "阿里妈妈-AI 应用研发【全栈应用研发】-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100014080001", "c": "淘天集团"},
+{"b": "淘宝平台事业部", "n": "淘宝平台事业部-大模型算法工程师-智能服务算法", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=7000046307", "c": "淘天集团"},
+{"b": "淘宝平台事业部", "n": "淘宝平台事业部-大模型算法应用工程师-Service Agent", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100010960018", "c": "淘天集团"},
+{"b": "阿里妈妈", "n": "阿里妈妈-风控算法工程师-北京", "l": "北京", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100013800017", "c": "淘天集团"},
+{"b": "阿里妈妈", "n": "阿里妈妈-AI Agent工程师-北京", "l": "北京", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100013800016", "c": "淘天集团"},
+{"b": "淘宝平台事业部", "n": "淘宝平台事业部-大模型算法专家-量化计算", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100010040028", "c": "淘天集团"},
+{"b": "淘宝平台事业部", "n": "淘宝平台事业部-大模型应用算法工程师（售后方向）-商家智能服务", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100005700004", "c": "淘天集团"},
+{"b": "淘天算法技术", "n": "淘天算法技术-AI搜算法工程师-杭州/北京", "l": "北京 / 杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100011340004", "c": "淘天集团"},
+{"b": "AI原生应用", "n": "AI原生应用-多模态算法工程师-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100007060014", "c": "淘天集团"},
+{"b": "AI原生应用", "n": "AI原生应用-多模态大模型算法专家-杭州", "l": "杭州", "u": "https://talent.taotian.com/off-campus/position-detail?positionId=100005560003", "c": "淘天集团"},
+{"b": "高德", "n": "高德-VLA/WAM算法工程师/专家-具身业务", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100015700002", "c": "高德地图"},
+{"b": "高德", "n": "高德-高级java开发工程师-国际化-共享专项", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=7000035206", "c": "高德地图"},
+{"b": "高德", "n": "高德-多模态大模型/端到端算法工程师/专家-车道级导航方向-视觉技术中心（急招）", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100003440007", "c": "高德地图"},
+{"b": "高德", "n": "高德-全栈工程师-Agentic AI探索业务专项", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100013280009", "c": "高德地图"},
+{"b": "高德", "n": "高德-Agent工程师（用户增长平台）-信息业务中心", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100012500008", "c": "高德地图"},
+{"b": "高德", "n": "高德-高级 AI 应用工程师-Agent研发专项", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100012920005", "c": "高德地图"},
+{"b": "高德", "n": "高德-全栈工程师-Agentic AI探索业务", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100013720006", "c": "高德地图"},
+{"b": "高德", "n": "高德-三维研发-端应用开发专家-大云图", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100007420009", "c": "高德地图"},
+{"b": "高德", "n": "高德-广告算法专家（预估/机制/创意/流量增长）-信息算法热招", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100009180005", "c": "高德地图"},
+{"b": "高德", "n": "高德-前端业务负责人P8-信息工程专项", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100001960003", "c": "高德地图"},
+{"b": "高德", "n": "高德-机器人系统软件工程师（通讯中间件方向）-具身业务部", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100015680002", "c": "高德地图"},
+{"b": "高德", "n": "高德-NLP/搜推/大模型算法工程师/专家(P6/7）-POI智能化", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=846816", "c": "高德地图"},
+{"b": "高德", "n": "高德-3D/视频生成与世界模型算法专家/工程师-视觉团队", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100006520001", "c": "高德地图"},
+{"b": "高德", "n": "高德-AI Agent开发工程师（业财平台）-杭州-信息工程专项", "l": "杭州", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100001040013", "c": "高德地图"},
+{"b": "高德", "n": "高德-AI Agent开发工程师（销售平台）-杭州-信息工程专项", "l": "杭州", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100000840033", "c": "高德地图"},
+{"b": "高德", "n": "高德-算法工程专家-模型推理方向", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100011400043", "c": "高德地图"},
+{"b": "高德", "n": "高德-用户画像算法专家-信息业务中心", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100013200001", "c": "高德地图"},
+{"b": "高德", "n": "高德-推荐算法专家-信息算法热招", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100012020011", "c": "高德地图"},
+{"b": "高德", "n": "高德-营销Agent工程师-信息算法热招", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100014000005", "c": "高德地图"},
+{"b": "高德", "n": "高德-多模态算法负责人-信息算法热招", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100014460006", "c": "高德地图"},
+{"b": "高德", "n": "高德-内容算法专家-信息业务中心", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100013180002", "c": "高德地图"},
+{"b": "高德", "n": "高德-AI平台开发工程师/架构师-信息工程专项", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100009920016", "c": "高德地图"},
+{"b": "高德", "n": "高德-高级 AI 应用工程师-Agent研发", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100013760003", "c": "高德地图"},
+{"b": "高德", "n": "高德-风控策略（反作弊）-北京", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=7000040815", "c": "高德地图"},
+{"b": "高德", "n": "高德-Agent后端开发工程师/专家-出行业务", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100010520002", "c": "高德地图"},
+{"b": "高德", "n": "高德-C++开发工程师-导航规划", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=7000024401", "c": "高德地图"},
+{"b": "高德", "n": "高德-具身大模型算法（VLA移动操控方向）-具身业务部", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100014460005", "c": "高德地图"},
+{"b": "高德", "n": "高德-具身大模型算法（多模态感知方向）-具身业务部", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100014660002", "c": "高德地图"},
+{"b": "高德", "n": "高德-高级具身运控算法工程师/专家-具身业务部", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=7000045506", "c": "高德地图"},
+{"b": "高德", "n": "高德-Java开发工程师/专家-北京", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100014400011", "c": "高德地图"},
+{"b": "高德", "n": "高德-前端开发工程师/专家（交易研发）-信息工程专项", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100000880055", "c": "高德地图"},
+{"b": "高德", "n": "高德-多模态大模型算法工程师-空间智能方向-视觉技术中心", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100009500007", "c": "高德地图"},
+{"b": "高德", "n": "高德-视觉算法高级工程师/专家（感知识别方向）-视觉技术中心（急招）", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100003460007", "c": "高德地图"},
+{"b": "高德", "n": "高德-高级生成式大模型算法工程师/专家-视觉技术中心", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100005980007", "c": "高德地图"},
+{"b": "高德", "n": "高德-高级大数据工程师-数仓与 AI 赋能方向", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100012840005", "c": "高德地图"},
+{"b": "高德", "n": "高德-三维重建/生成模型与世界模型算法工程师/专家-视觉技术中心", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100008100005", "c": "高德地图"},
+{"b": "高德", "n": "高德-AI Agent专家/架构师-APP平台业务中心", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100011720046", "c": "高德地图"},
+{"b": "高德", "n": "高德-Golang高级开发工程师-LBS/风控/大模型-共享专项", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100010080015", "c": "高德地图"},
+{"b": "高德", "n": "高德-Agent工程师（商品平台）-信息工程攻坚", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100011620011", "c": "高德地图"},
+{"b": "高德", "n": "高德-平台风控策略-风险管理", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=7000035906", "c": "高德地图"},
+{"b": "高德", "n": "高德-二三维时空底座研发-大云图", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=7000028408", "c": "高德地图"},
+{"b": "高德", "n": "高德-Java 技术专家/高级开发工程师-大云图", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100011600010", "c": "高德地图"},
+{"b": "高德", "n": "高德-高德打车算法专家-路线&上下车点推荐", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=7000039404", "c": "高德地图"},
+{"b": "高德", "n": "高德-打车营销算法-生成式建模", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100014120003", "c": "高德地图"},
+{"b": "高德", "n": "高德-AIGC多模态生成&理解算法工程师/专家-北京", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=7000023911", "c": "高德地图"},
+{"b": "高德", "n": "高德-Java 高级工程师/技术专家-大云图", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100011040011", "c": "高德地图"},
+{"b": "高德", "n": "高德-行业/平台资深技术专家（房产/车服/酒旅/到餐/到综等行业·AI Native 方向）-信息工程专项", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100012660002", "c": "高德地图"},
+{"b": "高德", "n": "高德-具身通用运控算法工程师(强化学习方向)-具身业务部", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100009300003", "c": "高德地图"},
+{"b": "高德", "n": "高德-具身智能数据仿真专家-具身智能数据方向", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100012380012", "c": "高德地图"},
+{"b": "高德", "n": "高德-具身智能数据闭环 Sandbox 研发工程师-具身智能数据方向", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100014120002", "c": "高德地图"},
+{"b": "高德", "n": "高德-具身智能平台研发工程师-具身智能数据方向", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100014120001", "c": "高德地图"},
+{"b": "高德", "n": "高德-具身智能数据闭环 Agent 模型研发工程师-具身智能数据方向", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100014040002", "c": "高德地图"},
+{"b": "高德", "n": "高德-具身智能数据闭环 Agent 研发工程师-具身智能数据方向", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100014060003", "c": "高德地图"},
+{"b": "高德", "n": "高德-Golang高级开发工程师/开发专家-营销&用户增长", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=7000015910", "c": "高德地图"},
+{"b": "高德", "n": "高德-算法工程化/推理优化/计算图工程师/专家-具身系统软件方向", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100013820008", "c": "高德地图"},
+{"b": "高德", "n": "高德-端侧 DevOps/OTA/SRE 工程师/专家-具身系统软件方向", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100013780011", "c": "高德地图"},
+{"b": "高德", "n": "高德-数据回放/问题复现/算法可视化工具工程师/专家-具身系统软件方向", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100013920009", "c": "高德地图"},
+{"b": "高德", "n": "高德-具身机器人软件开发工程师（端侧应用/任务系统方向）-具身系统软件方向", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100012020012", "c": "高德地图"},
+{"b": "高德", "n": "高德-具身机器人系统软件专家-具身系统软件方向", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100010120051", "c": "高德地图"},
+{"b": "高德", "n": "高德-嵌入式 Linux/BSP/HAL 工程师/专家-具身系统软件方向", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100007420013", "c": "高德地图"},
+{"b": "高德", "n": "高德-流量攻防（反爬）-北京", "l": "北京", "u": "https://talent.amap.com/off-campus/position-detail?positionId=100011640008", "c": "高德地图"},
+{"b": "ATH事业群", "n": "ATH事业群-AI开发者运营-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013863002", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-资深技术服务工程师-新金融技术服务", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100009443003", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-高级服务器硬件运维保障工程师-基础设施事业部", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008723016", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-资深服务器硬件运维保障工程师-基础设施事业部", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013903004", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-资深研发项目管理-基础产品平台", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100007203004", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-技术翻译专家-技术内容国际化", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100010203002", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-技术培训专家-企业培训部", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013803003", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-高级应用算法工程师-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013843006", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-容器服务AI基础设施研发专家-杭州", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100001703008", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-SOC值班长-IDC安全管理", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100009543001", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-资深电气主管工程师-杭州/ 上海 /张家口/ 嘉善/北京", "l": "嘉善县 / 北京 / 张家口 / 杭州 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=2000017909", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-运维工程师（资产）-北京/杭州/惠州/中卫/桐庐/常熟/乌兰察布", "l": "嘉兴 / 杭州 / 惠州 / 无锡", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=2000082402", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-高级IT自维修工程师( 南通 杭州）-国内属地集群", "l": "南通 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=2000085807", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-IDC运维技术专家-电气/暖通-廊坊", "l": "北京", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100012303002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-数据中心资产处置专家-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008723017", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-IDC安全技术专家-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100007663006", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-生态运营专家-采供&IDC-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008583002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-数据中心AI运营专家-智能决策/成本与风险治理方向-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013863005", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-交付项目管理专家-公共云业务-深圳/广州/北京/上海/杭州/成都/贵阳", "l": "北京", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100010143002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-MaaS算力资源交付与项目管理-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100012043001", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-高级暖通主管工程师-涿州", "l": "北京", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013903003", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-IDC基础设施运维专家-电气/暖通-张北集群", "l": "张家口", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013843005", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-SOC值班长-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100007303008", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-终端智能创新业务 Agent专家（AI引擎方向）-杭州/上海/北京", "l": "北京 / 杭州 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100009783002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-大模型前沿部署工程师（工业场景）-北京/上海/杭州/深圳/广州", "l": "北京 / 深圳 / 杭州 / 广州 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013943002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-Salesforce云平台运维高级工程师-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013763004", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI大模型技术服务工程师-政企客户", "l": "西安 / 成都 / 北京 / 武汉 / 深圳 / 杭州 / 南京 / 广州 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100007363002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-端侧智能平台负责人 / Head of On-Device AI Platform-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100010303002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-云原生Agentic AI架构师 / Cloud-Native Agentic AI Architect-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100010383002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-行业（电商/客服）解决方案架构师 / Architect of Industry Solutions, E-Commerce & Customer Service-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100010423001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-多模态AI搜索平台负责人/ Head of Multimodal AI Search-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100010363003", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-算力供应链优化师 / Compute Supply Chain Optimization Strategist-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100010443001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI 数据开发（ETL）工程-秒悟-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100007403009", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI Search多模态算法工程师-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008243003", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI 服务端开发工程师-秒悟-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100007463008", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI Agent研发工程师-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100007503011", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI Agent应用研发工程师-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008603008", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI Data 工程师-MaaS数据-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008563007", "c": "阿里云"},
+{"b": "ATH事业群", "n": "ATH事业群-AI Agent研发工程师/专家-AI视频生产-北京/杭州", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100012343003", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-Android 系统开发工程师/专家-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100011223001", "c": "阿里云"},
+{"b": "ATH事业部", "n": "ATH事业部-应用算法开发工程师-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100011363001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-技术专家-AI Agent方向-北京", "l": "北京", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100011923001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI产品评测专家/工程师-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100004763001", "c": "阿里云"},
+{"b": "ATH事业群", "n": "ATH事业群-AI Agent 测试开发工程师-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008663015", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-多模态理解大模型算法工程师（后训练方向）-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008383004", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-MaaS技术内容高级专家-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100011003001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-高级 AI 前端工程师（全栈方向）-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008663018", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-高级技术服务工程师-专家服务部", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100012803002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI Agent研发工程师-AI搜索-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100011023003", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-IDC资源规划专家-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008843001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI Agent 测试开发工程师-秒悟-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100007403008", "c": "阿里云"},
+{"b": "ATH事业群", "n": "ATH事业群-AI平台研发工程师/专家-AI视频生产-北京/杭州", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100012483002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-IDC工程设计专家-弱电方向-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008363003", "c": "阿里云"},
+{"b": "ATH事业群", "n": "ATH事业群-通义晓蜜大模型Agent应用专家-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100012983004", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI Agent测试开发工程师/专家-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008003001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI Infra研发专家-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100012603001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI Agent研发工程师/专家-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100011583002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI Agent 客户端开发工程师/专家-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100011243001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI Agent全栈开发工程师-秒悟-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100007583015", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-资源运营专家-MaaS业务部-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013543005", "c": "阿里云"},
+{"b": "ATH事业群", "n": "ATH事业群-大模型语音Agent技术专家-通义晓蜜-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013183001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-高级 AI 前端工程师（桌面端/Agent 方向）-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008003003", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-语音&全模态大模型算法工程师-后训练方向-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008803001", "c": "阿里云"},
+{"b": "ATH事业群", "n": "ATH事业群-AI 前端开发工程师-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008603016", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-客户端设备端系统开发工程师/专家-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100012863001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI应用研发工程师/专家-AI Agent Infra-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008223009", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-IDC设施运维工程-电气/暖通-上海集群", "l": "上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013443001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-供应链专家-AI产品制造和质量-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013483001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-整机计划与供应专家-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013643002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-IDC基础设施运维专家-电气/暖通-张家口（张北）", "l": "张家口", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013603002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-物流仓储管理专家-关务管理方向-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013523001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI应用架构师-供采领域-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013523005", "c": "阿里云"},
+{"b": "ATH事业群", "n": "ATH事业群-AI应用开发工程师-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008723014", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI Agent 客户端开发工程师-安卓/ios-秒悟-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100007463009", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI智能对话算法工程师-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008663001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI搜索算法工程师-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008643001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-MaaS技术内容专家-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100010983002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-阿里云 Elasticsearch AI 搜索 & Agent Native 研发工程师-阿里云Elasticsearch管控团队", "l": "北京", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013823004", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-解决方案架构师（消费电子KA方向)-深圳", "l": "深圳", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008243009", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-专有云资深产品技术架构师（AI方向）-北京/杭州", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=2000073502", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI 架构及后端研发高级专家（ABE）--杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013783004", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-资深云迁移服务工程师-国际", "l": "北京 / 杭州 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013543001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-无影云手机Android系统专家-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013823003", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-高级工厂管理工程师（生产运营）-硬件计划与供应部", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013763002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI智算集群监管控及算力管理平台开发专家-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100001843008", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-安全容器系统技术专家-杭州/上海", "l": "杭州 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100001883004", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-异构 GPU集群资源优化开发专家-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100001803002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-灵骏 SRE技术专家-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100000563022", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-灵骏 SRE专家-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100000523021", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-IDC设施运维工程-电气/暖通-杭州集群", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013943001", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-资深后端开发工程师-CTO", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013843004", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-服务器研发软硬件结合开发专家-深圳/北京", "l": "北京 / 深圳", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008743002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI性能优化技术专家-软硬协同加速-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=2000037902", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-容器服务与 Agent 基础设施开发专家-杭州/北京/深圳", "l": "北京 / 深圳 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100008603015", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-高级服务器整机计划工程师-硬件计划与供应部", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013783002", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-资深安全运营-绿网思明", "l": "上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100012643004", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-高性能网络高级架构师-北京/杭州", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013643001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-高性能网络高级架构师-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013663001", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-高级技术服务工程师-大模型方向L2", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013843002", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-资深技术服务工程师-大模型方向L2", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013883001", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-资深技术服务工程师-专家服务部", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100011823002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI客户体验专家-NPS与体验-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100011583003", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-L2技术支持专家-国际海外业务线", "l": "北京 / 杭州 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100004043012", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-公共云迁移交付专家-迁移专家组", "l": "北京 / 杭州 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100011323001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-技术-方案与服务-技术服务-海外事业部-国际客户技术服务部-GKA-A服务部", "l": "上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100000183002", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-高级一码通运营工程师-硬件计划与供应部", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013763003", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-高级仓配运营管理工程师-硬件计划与供应部", "l": "深圳", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013803002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-客户成功经理（大区）-北京", "l": "北京", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013803001", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-资深平台开发工程师-统一算力运营平台", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013703002", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-高级平台开发工程师-统一算力运营平台", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100011303002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-大模型研发算法专家/高级算法专家（多模态/全模态/LLM）-北京/杭州", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013783001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-无影Java高级开发工程师-北京", "l": "北京", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013763001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-IaaS架构与研发专家/高级专家（AI安全方向）-北京/上海/深圳/杭州", "l": "北京 / 深圳 / 杭州 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013623003", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-云迁移专家-云迁移与专有云交付专家", "l": "北京 / 杭州 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100000343014", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-云迁移与专有云交付专家-迁移专家组", "l": "北京 / 杭州 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=2008903001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-项目经理-杭州/上海/北京", "l": "北京 / 杭州 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100000523018", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-文件系统研发专家-上海/杭州", "l": "杭州 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013543007", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-文件系统研发专家-杭州/上海", "l": "杭州 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013503005", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI Agent开发者运营专家-弹性计算", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013503002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-技术服务专家TAM-国际客户技术服务部-欧洲及英国服务部 - 上海/北京/杭州", "l": "上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013583005", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-Technical Account Manager-Japan", "l": "北京 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100012983002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI Agent 研发专家/高级专家-Agentic System 研发方向", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100010703001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI原生中间件开发技术专家-北京/杭州", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013703001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI应用研发工程师（PaaS）-北京/杭州", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013523004", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-agent sandbox平台开发专家-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013563002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-agent sandbox管控开发专家-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013483003", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-agent sandbox运行时开发专家-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013683001", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-高级IDC运维工程师（安全）-嘉兴/北京/廊坊/怀来/宁波/乌兰/中卫", "l": "廊坊 / 乌兰察布 / 北京 / 嘉兴 / 中卫 / 张家口 / 宁波", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100006203001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI 知识工程师（综合方向）-杭州/北京", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100006123003", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-技术服务专家-政企业务-北京/杭州", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013663002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-大模型技术服务工程师-杭州/西安", "l": "西安 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100006743006", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-高级IDC运维工程师（设施）-南京/中卫/上海/常熟/惠州/北京/呼和浩特/杭州", "l": "廊坊 / 北京 / 中卫 / 呼和浩特 / 杭州 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013063002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-机器学习平台研发专家-AI平台管控与资源调度", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013283001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-机器学习平台研发专家-AI推理系统开发工程师", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013303001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-大模型训练系统研发工程师-PAI平台", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013603001", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-高级IDC运维工程师（IT）-杭州/怀来/北京/乌兰察布/上海/宁波/中卫/呼和浩特", "l": "乌兰察布 / 中卫 / 张家口 / 呼和浩特 / 宁波", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100010283001", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-资深IDC运维工程师（设施）-南京/常熟/上海/杭州/惠州/北京", "l": "廊坊 / 乌兰察布 / 中卫 / 呼和浩特 / 无锡", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100000583015", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-IDC运维工程师（资产）-北京/杭州/惠州/中卫/桐庐/常熟/乌兰察布", "l": "中卫", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100006903003", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-高级资产运维工程师-北京/杭州/惠州/中卫/桐庐/常熟/乌兰察布/廊坊", "l": "廊坊 / 乌兰察布 / 北京 / 中卫 / 呼和浩特 / 常熟", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100010343003", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-高级运维工程师-L2专家组", "l": "北京 / 杭州 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013563001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-终端智能创新业务 Android系统专家 (BSP方向)-杭州/上海/北京/深圳", "l": "北京 / 深圳 / 杭州 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100009703002", "c": "阿里云"},
+{"b": "诚云科技", "n": "诚云科技-资深关务运营管理-仓储物流", "l": "南通", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013383002", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-高级开发工程师-供应链/Agent应用-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013203001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-AI加速计算产品研发专家-杭州/上海", "l": "杭州 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013163001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-对象存储研发专家-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013143001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-研发流程管理专家-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013123001", "c": "阿里云"},
+{"b": "阿里云智能", "n": "阿里云智能-云产品安全保障专家-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013043001", "c": "阿里云"},
+{"b": "瓴羊", "n": "瓴羊-交付运营专家-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013943005", "c": "阿里云"},
+{"b": "瓴羊", "n": "瓴羊-AI前沿部署工程师-北京", "l": "北京", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013743003", "c": "阿里云"},
+{"b": "瓴羊", "n": "瓴羊-AI前沿部署工程师-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013883002", "c": "阿里云"},
+{"b": "瓴羊", "n": "瓴羊-AI测试开发工程师-营销云", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100010683001", "c": "阿里云"},
+{"b": "瓴羊", "n": "瓴羊-数据分析-营销数据", "l": "北京 / 杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100005483002", "c": "阿里云"},
+{"b": "瓴羊", "n": "瓴羊-高级Agent开发工程师(FDE)-杭州", "l": "杭州", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013243001", "c": "阿里云"},
+{"b": "瓴羊", "n": "瓴羊-高级客户成功经理-MNC&海外业务", "l": "杭州 / 上海", "u": "https://careers.aliyun.com/off-campus/position-detail?positionId=100013223001", "c": "阿里云"},
+{"b": "千问事业部", "n": "千问事业部-Agent 算法专家（AI内容创作）-北京", "l": "北京", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=7000034305", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-MOS 实验室-数据科学家-千问C端场景-杭州", "l": "杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100011280001", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-MOS 实验室-推荐/推送算法专家（大模型方向）-杭州/北京/广州", "l": "北京 / 杭州 / 广州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100004320002", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-技术专家-眼镜AI助手", "l": "杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100011020004", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-Android高级开发工程师-UC浏览器 北京/广州", "l": "北京 / 广州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100010100029", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-主动服务Agent应用研发专家-杭州", "l": "杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100016380002", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-AI 全栈开发工程师-智能创作-广州", "l": "广州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100016180005", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-产品体验&新媒体内容策划专家-杭州", "l": "杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100011640027", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-PC高级开发工程师-广州/杭州", "l": "杭州 / 广州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100000980012", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-iOS高级开发工程师-UC浏览器 北京/广州", "l": "北京 / 广州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100010100028", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-鸿蒙高级开发工程师-UC浏览器 北京/广州", "l": "北京 / 广州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100009920043", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-前端研发工程师-北京", "l": "北京", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100013220004", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-前端研发工程师-广州", "l": "广州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100010040039", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-广告检索工程架构开发-广告检索架构升级和优化", "l": "北京", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100010020001", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-广告算法专家-北京", "l": "北京", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=953901", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-大模型/AI-Agent 算法专家-智能营销平台广告算法 大模型/AI-Agent方向（北京）", "l": "北京", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=7000011004", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-搜索架构工程师-C++-北京", "l": "北京", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100010120015", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-高级测试开发专家-北京", "l": "北京", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100012200003", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-MOS 实验室-AI搜索算法专家-杭州/北京", "l": "北京 / 杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100009180003", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-语音多模态交互算法专家-杭州/北京/上海", "l": "北京 / 杭州 / 上海", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100010060008", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-千问/夸克-大模型预训练与应用算法工程师-杭州/北京", "l": "北京 / 杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=950202", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-大模型应用算法工程师/算法专家-北京", "l": "北京", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100000860007", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-Agent 开发工程师（智能创作）-广州", "l": "广州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100013240012", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-llm/omni算法专家(全模态语音助手方向)-北京/杭州", "l": "北京 / 杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100013240005", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-智能座舱Agent算法专家-北京/杭州", "l": "北京 / 杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100013160005", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-AI眼镜vlm算法专家-北京/杭州", "l": "北京 / 杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100013320003", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-智能穿戴agent算法专家-北京/杭州", "l": "北京 / 杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100010200022", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-vlm后训练算法专家(VQA agent)-北京/杭州", "l": "北京 / 杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100010160013", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-千问-多模态搜索/RAG-杭州/北京", "l": "北京 / 杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100001800006", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-MOS 实验室-AI Agent 算法专家（任务助理方向）-北京/杭州/广州", "l": "北京 / 杭州 / 广州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=7000026601", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-语音大模型高级开发工程师-杭州/广州", "l": "杭州 / 广州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100008280003", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-MOS 实验室-Agent Harness专家-北京/杭州/广州", "l": "北京 / 杭州 / 广州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100015300003", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-C++开发专家（内核、渲染引擎方向）-广州", "l": "广州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=7000003904", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-运动健康算法专家-杭州", "l": "杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100010640001", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-传感器测试专家-杭州/上海/深圳", "l": "深圳 / 杭州 / 上海", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100010780003", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-相机测试专家-杭州", "l": "杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=7000041102", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-传感器系统软件专家-杭州/上海/深圳", "l": "深圳 / 杭州 / 上海", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100004360008", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-内核内存专家-杭州/深圳/上海", "l": "深圳 / 杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=7000040803", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-应用容器开发专家-深圳/杭州", "l": "深圳 / 杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100010800006", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-Android系统框架开发专家-杭州/上海/深圳", "l": "杭州 / 上海", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100011000023", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-多模态交互算法专家-杭州/上海", "l": "杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100010820005", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-AI视频剪辑前端研发（智能创作）-广州", "l": "广州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100010060039", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-视觉大模型安全算法专家-大模型安全方向", "l": "北京", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=7000015613", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-数据研发工程师-北京-数据挖掘方向", "l": "北京", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100014900004", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-Agent应用研发专家/高级开发工程师-北京/杭州/广州", "l": "北京 / 杭州 / 广州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100013860007", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-AI Ops研发专家-运维智能体方向", "l": "杭州 / 广州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100011580029", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-自动化测试高级开发工程师-广州", "l": "广州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100009600003", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-千问-搜索算法专家-北京/广州", "l": "北京 / 广州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100013280004", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-Agent高级测试开发工程师-杭州", "l": "杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100012140008", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-iOS移动端研发专家-北京", "l": "北京", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100014320003", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-技术专家-电源/充电", "l": "上海", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100005600003", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-前沿大模型全栈研究员-北京/杭州", "l": "北京 / 杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100011840001", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-高级Java工程师-杭州", "l": "杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100011600017", "c": "夸克"},
+{"b": "千问C端事业群", "n": "千问C端事业群-微型声学系统专家-深圳/杭州", "l": "深圳 / 杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100014180001", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-Camera Hal软件专家-杭州/上海/深圳", "l": "深圳 / 杭州 / 上海", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100010560003", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-OCR多模态大模型算法专家-杭州", "l": "杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100001100025", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-高级应用算法工程师-广州", "l": "广州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100003560011", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-软件测试专家-杭州", "l": "杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100012080007", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-iOS应用开发专家-杭州/上海/深圳", "l": "深圳 / 杭州 / 上海", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100010780001", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-千问/夸克-Post-Training 高级算法专家-北京/杭州", "l": "北京 / 杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100000880021", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-Java研发专家-北京", "l": "北京", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100010080027", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-平台开放工程师（Agent 接入平台）-杭州/深圳/上海", "l": "深圳 / 杭州 / 上海", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100010920014", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-Java高级开发工程师/专家-广州/北京/杭州", "l": "北京 / 杭州 / 广州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=7000002813", "c": "夸克"},
+{"b": "千问事业部", "n": "千问事业部-图像生成&编辑算法专家-杭州", "l": "北京 / 杭州", "u": "https://talent.quark.cn/off-campus/position-detail?positionId=100008760013", "c": "夸克"},
+{"b": "钉钉", "n": "钉钉-硬件质量工程师-杭州", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100006720003", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-客户端开发工程师-Android/iOS", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=7000042803", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-服务端架构师-钉钉AI表格、钉钉文档", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=7000044202", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-数据挖掘工程师-商业中台", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100001720012", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-全球化AI研发工程师-DingTalk & WuKong", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100013860006", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-服务端-Java 研发工程师", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100015020001", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-智能硬件架构师-智能硬件", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100009420010", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-Agent 开发工程师-AI搜索", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100014680004", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-大模型算法工程师-AI搜索", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100014620004", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-大模型应用开发工程师-AI搜索", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100014680003", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-服务端开发工程师-AI Agent", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100014720002", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-桌面端开发工程师-Windows/Mac", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=7000042906", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-大模型评测-工程师 / 专家", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100013900011", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-质量工程师-智能硬件", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100009520008", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-前端开发工程师-智能硬件", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100006740014", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-前端研发工程师（AI表格/文档方向）-杭州", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=7000044702", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-AI(音频)-开发工程师", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100010320002", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-AI应用研发工程师-AI财务", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100007800009", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-数据工程师-视觉AI数据方向", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100010320017", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-AI应用研发工程师-智能差旅/财务", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100012000003", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-边缘视觉AI算法工程-杭州", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100009980033", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-数据科学-用户增长", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=7000045508", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-服务端研发-商业化", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100003100004", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-前端工程师-商业中台", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100004740006", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-AI 语音智能体（Agent）-专家", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100011680045", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-服务端开发专家-专有钉开发", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=7000042536", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-AI应用研发工程师-杭州", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100013100002", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-RTC 媒体服务-研发工程师", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100012680001", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-通用视觉理解（视频分析）-Agent 算法专家", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100011720024", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-AI数据工程师-杭州", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100000860003", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-AI Infra架构师-大模型训练方向", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=7000039414", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-大模型数据平台专家 / 架构师-(AI Data Infrastructure)", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100010940026", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-大模型应用算法专家-杭州", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=7000036541", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-服务端开发-AI私有化产品开发", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=7000043016", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-AI  Agent工程师-杭州", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100011160014", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-AI研发全栈工程师-智能合同", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100011480022", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-大模型应用算法工程师-多智能体方向", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=7000039719", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-爬虫研发专家-杭州", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100011720033", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-AI服务端开发工程师-智能人事方向", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100000880015", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-研发工程师-智能硬件", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100000980014", "c": "钉钉"},
+{"b": "悟空事业部", "n": "悟空事业部-Java 服务端开发工程师-钉钉视觉 AI 业务", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100013460012", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-前端研发工程师-开放平台", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=7000045704", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-Java研发工程师-（开放平台/智能硬件）", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=7000042611", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-AITable  存算引擎开发工程师-AI表格", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100006760010", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-前端技术专家-基础产品", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=7000042607", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-服务端研发-应用架构", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=7000039617", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-视觉AI高级工程师 / 资深算法工程师（工程落地方向）-杭州", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100007060016", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-嵌入式开发工程师-杭州", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100006840001", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-Java服务端开发-AI产品方向", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100000940018", "c": "钉钉"},
+{"b": "钉钉", "n": "钉钉-语音算法-工程师/专家", "l": "杭州", "u": "https://talent.dingtalk.com/off-campus/position-detail?positionId=100010200025", "c": "钉钉"}
+];
+
+const companies = ['全部', '淘天集团', '高德地图', '阿里云', '夸克', '钉钉'];
+let activeTab = '全部';
+
+const tabsEl = document.getElementById('tabs');
+companies.forEach(c => {
+  const cnt = c === '全部' ? DATA.length : DATA.filter(d => d.c === c).length;
+  const div = document.createElement('div');
+  div.className = 'tab' + (c === '全部' ? ' active' : '');
+  div.dataset.company = c;
+  div.innerHTML = c + '<span class="cnt">(' + cnt + ')</span>';
+  div.addEventListener('click', () => {
+    activeTab = c;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    div.classList.add('active');
+    document.getElementById('companyFilter').value = c === '全部' ? '' : c;
+    render();
+  });
+  tabsEl.appendChild(div);
+});
+
+const statsEl = document.getElementById('stats');
+companies.forEach(c => {
+  const cnt = c === '全部' ? DATA.length : DATA.filter(d => d.c === c).length;
+  const card = document.createElement('div');
+  card.className = 'stat-card';
+  card.innerHTML = '<div class="num">' + cnt + '</div><div class="label">' + (c === '全部' ? '总计' : c) + '</div>';
+  statsEl.appendChild(card);
+});
+
+const bizSet = new Set(); const locSet = new Set();
+DATA.forEach(d => { bizSet.add(d.b); d.l.split(' / ').forEach(loc => locSet.add(loc.trim())); });
+const companySelect = document.getElementById('companyFilter');
+const bizSelect = document.getElementById('bizFilter');
+const locSelect = document.getElementById('locFilter');
+companies.slice(1).forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; companySelect.appendChild(o); });
+Array.from(bizSet).sort().forEach(b => { const o = document.createElement('option'); o.value = b; o.textContent = b; bizSelect.appendChild(o); });
+Array.from(locSet).sort().forEach(l => { const o = document.createElement('option'); o.value = l; o.textContent = l; locSelect.appendChild(o); });
+
+function render() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const company = companySelect.value;
+  const biz = bizSelect.value;
+  const loc = locSelect.value;
+  const filtered = DATA.filter(d => {
+    if (q && !d.n.toLowerCase().includes(q) && !d.b.toLowerCase().includes(q) && !d.c.toLowerCase().includes(q)) return false;
+    if (company && d.c !== company) return false;
+    if (biz && d.b !== biz) return false;
+    if (loc && !d.l.includes(loc)) return false;
+    return true;
+  });
+  document.getElementById('countLabel').textContent = '共 ' + filtered.length + ' 个职位' + (filtered.length < DATA.length ? '（已筛选）' : '');
+  document.getElementById('tbody').innerHTML = filtered.map((d, i) =>
+    '<tr><td class="idx">' + (i+1) + '</td><td><span class="badge badge-co">' + d.c + '</span></td><td><span class="badge badge-biz">' + d.b + '</span></td><td>' + d.n + '</td><td>' + d.l + '</td><td><a href="' + d.u + '" target="_blank">投递</a></td></tr>'
+  ).join('');
+}
+document.getElementById('searchInput').addEventListener('input', render);
+companySelect.addEventListener('change', function() {
+  activeTab = this.value || '全部';
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.company === activeTab);
+  });
+  render();
+});
+bizSelect.addEventListener('change', render);
+locSelect.addEventListener('change', render);
+render();
+</script>
+</body>
+</html>
